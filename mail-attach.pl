@@ -11,18 +11,18 @@ use open (
 );
 @ARGV = map { decode('utf8', $_) } @ARGV;
 
-use MIME::Base64 ('encode_base64');
+use feature 'state';
+use MIME::Base64 'encode_base64';
 
 sub _qx($);
 
 sub main() {
 
-  my(
+  my (
     $file, $name, $fn, $fh, $buf, $bs, $cmd,
     $to, $from, $sub, $body,
     $contentType, $contentDisposition
   );
-
   $to   = 'foo@example.com';
   $from = 'bar@example.com';
 
@@ -33,12 +33,12 @@ sub main() {
           '?=';
   $sub  = $fn;
 
-  $contentType  = _qx("file -bi '$file'");
-  $contentType .= "; name=\"$fn\"";
+  $contentType  = _qx("file -bi '$file'").
+                  "; name=\"$fn\"";
   $contentDisposition = "attachment; filename=\"$fn\"";
 
   open($fh, '<:raw', $file) or die("$!:$file");
-  $bs = '4096';
+  $bs = 4096;
   while (read($fh, $buf, $bs)) {
     $body .= $buf;
   }
@@ -55,19 +55,16 @@ sub main() {
   print($fh $body);
   close($fh);
 
-  return('0');
+  return(0);
   
 } exit(main());
 
 
 sub _qx($) {
 
-  our($locale);
-  BEGIN {
-    $locale = find_encoding('utf8');
-  }
-  
-  my($cmd, $rtn);
+  state $locale = find_encoding('utf8');
+
+  my ($cmd, $rtn);
   $cmd = $locale->encode($_[0]);
   $rtn = qx($cmd);
   chomp($rtn);
