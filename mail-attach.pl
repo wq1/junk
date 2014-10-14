@@ -13,18 +13,12 @@ use open (
 
 use MIME::Base64 ('encode_base64');
 
-my($utf8, $cp932, $locale);
-$utf8   = find_encoding('utf8');
-$cp932  = find_encoding('cp932');
-$locale = $utf8;
-
-
 sub main() {
 
   my(
+    $file, $name, $fn, $fh, $buf, $bs, $cmd,
     $to, $from, $sub, $body,
-    $contentType, $contentDisposition,
-    $file, $name, $fn, $fh, $buf, $bs, $cmd
+    $contentType, $contentDisposition
   );
 
   $to   = 'foo@example.com';
@@ -66,17 +60,15 @@ sub main() {
 
 sub _qx($) {
 
+  our($locale);
+  BEGIN {
+    $locale = find_encoding('utf8');
+  }
+  
   my($cmd, $rtn);
-  $cmd = _encode($locale, $_[0]);
+  $cmd = $locale->encode($_[0]);
   $rtn = qx($cmd);
   chomp($rtn);
   return($rtn);
-  
-}
-
-
-sub _encode($$) {
-
-  return($_[0]->encode($_[1]));
   
 }
