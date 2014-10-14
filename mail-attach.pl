@@ -21,7 +21,7 @@ sub _qx($);
 sub main() {
 
   my (
-    $file, $name, $fn, $fh, $buf, $bs, $cmd,
+    $file, $name, $fn, $in, $out, $buf, $bs, $cmd,
     $to, $from, $sub, $body,
     $contentType, $contentDisposition
   );
@@ -39,23 +39,23 @@ sub main() {
                   "; name=\"$fn\"";
   $contentDisposition = "attachment; filename=\"$fn\"";
 
-  open($fh, '<:raw', $file) or die("$!:$file");
-  $bs = 4096;
-  while (read($fh, $buf, $bs)) {
-    $body .= $buf;
-  }
-  close($fh);
-  $body = encode_base64($body);
-
   $cmd = "mail".
          " -aContent-Type:'$contentType'".
          " -aContent-Disposition:'$contentDisposition'".
          " -aContent-Transfer-Encoding:'base64'".
          " -s $sub".
          " -aFrom:$from $to";
-  open($fh, '|-:raw', $cmd) or die("$!");
-  print($fh $body);
-  close($fh);
+  $cmd = encode('utf8', $cmd);
+
+  open($in, '<:raw', $file)  or die("$!:$file");
+  open($out, '|-:raw', $cmd) or die("$!");
+  $bs = 57*71; # 57bytes*71 < 4096
+  while (read($in, $buf, $bs)) {
+    $buf = encode_base64($buf);
+    print($out $buf);
+  }
+  close($out);
+  close($in);
 
   return(0);
   
