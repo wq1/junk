@@ -35,7 +35,7 @@ sub main() {
   $contentType .= "; name=\"$fn\"";
   $contentDisposition = "attachment; filename=\"$fn\"";
 
-  open($fh, '<:raw', $file) or die "$!:$file";
+  open($fh, '<:raw', $file) or die("$!:$file");
   $bs = '4096';
   while (read($fh, $buf, $bs)) {
     $body .= $buf;
@@ -49,11 +49,11 @@ sub main() {
          " -aContent-Transfer-Encoding:'base64'".
          " -s $sub".
          " -aFrom:$from $to";
-  open($fh, '|-:raw', $cmd) or die "$!";
+  open($fh, '|-:raw', $cmd) or die("$!");
   print($fh $body);
   close($fh);
 
-  return 0;
+  return('0');
   
 } exit(main());
 
