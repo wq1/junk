@@ -13,6 +13,8 @@ use open (
 
 use MIME::Base64 ('encode_base64');
 
+sub _qx($);
+
 sub main() {
 
   my(
@@ -31,7 +33,7 @@ sub main() {
           '?=';
   $sub  = $fn;
 
-  $contentType  = _qx("file -b --mime-type '$file'");
+  $contentType  = _qx("file -bi '$file'");
   $contentType .= "; name=\"$fn\"";
   $contentDisposition = "attachment; filename=\"$fn\"";
 
