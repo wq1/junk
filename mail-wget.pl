@@ -7,13 +7,17 @@ use Encode;
 use open (
   IN  => ':encoding(utf8)',
   OUT => ':utf8',
-  ':std'
+  ':std',
 );
 @ARGV = map { decode('utf8', $_) } @ARGV;
 
 use MIME::Base64 'encode_base64';
-#use URI::Escape;
-use Encode::Guess ('euc-jp', 'shiftjis', '7bit-jis');
+use URI::Escape;
+use Encode::Guess (
+  'euc-jp',
+  'shiftjis',
+  '7bit-jis',
+);
 use IPC::Open3;
 
 use constant LOCALE => find_encoding('utf8');
@@ -24,7 +28,7 @@ sub main() {
   my (
     $sub, $from, $to,
     $contentType, $contentDisposition,
-    $html64
+    $html64,
   );
 
   $to   = 'foo@example.com';
@@ -37,7 +41,7 @@ sub main() {
       my (
         $wget, $wgetOut,
         $mime, $mimeIn, $mimeOut, $mimePid,
-        $buf, $bs
+        $buf, $bs,
       );
 
       $mime = "file -bi -";
@@ -70,30 +74,46 @@ sub main() {
     chomp($contentType);
   # chomp($html64);
 
-    if ($contentType =~ /(.*?);/) {
-      my $fn;
+    if ($contentType =~ /(.+?);/) {
+      my ($fn, $setSub);
+
+      $setSub = sub {
+        my $fn64;
+        $fn64 = '=?UTF-8?B?'.
+                encode_base64(encode_utf8($fn), '').
+                '?=';
+        $sub  = '=?UTF-8?B?'.
+                encode_base64(encode_utf8($1), '').
+                '?=';
+
+        $contentType  .= "; name=\"$fn64\"";
+        $contentDisposition = "attachment; filename=\"$fn64\"";
+        return(0);
+      };
+
       if ($1 eq 'text/html') {
-        my ($htmlDecoder, $fn64);
+        my $htmlDecoder;
 
         $htmlDecoder = guess_encoding($html);
-        last unless ref($htmlDecoder);
+        if (! ref($htmlDecoder)) {
+          $htmlDecoder = find_encoding('utf8');
+        }
         $html = $htmlDecoder->decode($html);
 
-        if ($html =~ /<title.*?>\s*(.*?)\s*<\/title/si) {
+        if ($html =~ /<title.*?>\s*(.+?)\s*<\/title/si) {
           $fn   = "$1.html";
-          $fn64 = '=?UTF-8?B?'.
-                  encode_base64(encode_utf8($fn), '').
-                  '?=';
-          $sub  = '=?UTF-8?B?'.
-                  encode_base64(encode_utf8($1), '').
-                  '?=';
-
-          $contentType  .= "; name=\"$fn64\"";
-          $contentDisposition = "attachment; filename=\"$fn64\"";
+          $setSub->();
         }
       }
-      if ($fn eq '') {
-        die();
+      if (! defined($fn)) {
+        if ($ARGV[0] =~ /.*\/(.+)/) {
+          # Maybe need URL Decode with URI::Escape
+          $fn = $1;
+          $setSub->();
+        } else {
+          $fn = 'noname';
+          $setSub->();
+        }
       }
     } else {
       die();
