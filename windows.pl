@@ -7,14 +7,13 @@ use Encode;
 use open (
   IN  => ':encoding(cp932)',
   OUT => ':encoding(cp932)',
-  ':std'
+  ':std',
 );
 @ARGV = map { decode('cp932', $_) } @ARGV;
 
-use feature 'state';
-
-
 sub _qx($);
+
+use constant LOCALE => find_encoding('cp932');
 
 
 sub main() {
@@ -27,13 +26,16 @@ sub main() {
 
 sub _qx($) {
 
-  state $locale = find_encoding('cp932');
-  state $bs     = 4096;
- 
-  my($cmd, $rtn, $fh, $buf);
-  $cmd = $locale->encode($_[0]);
+  my (
+    $cmd, $rtn,
+    $fh, $buf, $bs,
+  );
 
-  open($fh, '-|', $cmd) or die("$!");
+  $cmd = LOCALE->encode($_[0]);
+
+  open($fh, '-|', $cmd)
+    || die($!);
+  $bs = 4096;
   while (read($fh, $buf, $bs)) {
     $rtn .= $buf;
   }
