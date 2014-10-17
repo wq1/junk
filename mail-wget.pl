@@ -12,7 +12,7 @@ use open (
 @ARGV = map { decode('utf8', $_) } @ARGV;
 
 use MIME::Base64 'encode_base64';
-use URI::Escape;
+#use URI::Escape;
 use Encode::Guess (
   'euc-jp',
   'shiftjis',
@@ -81,10 +81,12 @@ sub main() {
         my $fn64;
         $fn64 = '=?UTF-8?B?'.
                 encode_base64(encode_utf8($fn), '').
-                '?=';
+                '?='.
+                '';
         $sub  = '=?UTF-8?B?'.
                 encode_base64(encode_utf8($1), '').
-                '?=';
+                '?='.
+                '';
 
         $contentType  .= "; name=\"$fn64\"";
         $contentDisposition = "attachment; filename=\"$fn64\"";
@@ -121,22 +123,22 @@ sub main() {
   }
 
   {
-    my ($mail, $in);
+    my ($head, $mail, $in);
+
+    $head = "MIME-Version: 1.0\n".
+            "Subject: $sub\n".
+            "From: <$from>\n".
+            "To: <$to>\n".
+            "Content-Type: $contentType\n".
+            "Content-Disposition: $contentDisposition\n".
+            "Content-Transfer-Encoding: base64\n".
+            '';
 
     $mail = "sendmail -itf '$from'";
     open($in, '|-:raw', LOCALE->encode($mail))
       || die($!);
-
-    print($in "MIME-Version: 1.0", "\n");
-    print($in "Subject: $sub", "\n");
-    print($in "From: <$from>", "\n");
-    print($in "To: <$to>", "\n");
-    print($in "Content-Type: $contentType", "\n");
-    print($in "Content-Disposition: $contentDisposition", "\n");
-    print($in "Content-Transfer-Encoding: base64", "\n");
-    print($in "\n");
-    print($in "$html64");
-
+    print($in encode('us-ascii', $head));
+    print($in $html64);
     close($in);
   }
 
