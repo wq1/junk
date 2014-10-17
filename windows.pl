@@ -9,7 +9,7 @@ use open (
   OUT => ':encoding(cp932)',
   ':std',
 );
-@ARGV = map { decode('cp932', $_) } @ARGV;
+@ARGV = map { decode('cp932', $_); } @ARGV;
 
 sub _qx($);
 

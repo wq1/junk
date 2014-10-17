@@ -9,7 +9,7 @@ use open (
   OUT => ':utf8',
   ':std',
 );
-@ARGV = map { decode('utf8', $_) } @ARGV;
+@ARGV = map { decode('utf8', $_); } @ARGV;
 
 use MIME::Base64 'encode_base64';
 use File::Basename;
