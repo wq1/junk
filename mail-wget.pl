@@ -123,7 +123,7 @@ sub main() {
   {
     my ($mail, $in);
 
-    $mail = "sendmail -i '$to'";
+    $mail = "sendmail -itf '$from'";
     open($in, '|-:raw', LOCALE->encode($mail))
       || die($!);
 
