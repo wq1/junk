@@ -7,69 +7,88 @@ use Encode;
 use open (
   IN  => ':encoding(utf8)',
   OUT => ':utf8',
-  ':std'
+  ':std',
 );
 @ARGV = map { decode('utf8', $_) } @ARGV;
 
-use feature 'state';
 use MIME::Base64 'encode_base64';
-
+use File::Basename;
 
 sub _qx($);
+
+use constant LOCALE => find_encoding('utf8');
 
 
 sub main() {
 
   my (
-    $file, $name, $fn, $in, $out, $buf, $bs, $cmd,
-    $to, $from, $sub, $body,
-    $contentType, $contentDisposition
+    $file, $sub, $from, $to,
+    $contentType, $contentDisposition,
   );
+
   $to   = 'foo@example.com';
   $from = 'bar@example.com';
 
-  $file = $ARGV[0];
-  $name = _qx("ls '$file' | xargs -I{} basename {}");
-  $fn   = '=?UTF-8?B?'.
-          encode_base64(encode_utf8($name), '').
-          '?=';
-  $sub  = $fn;
+  {
+    my ($fn, $fn64);
 
-  $contentType  = _qx("file -bi '$file'").
-                  "; name=\"$fn\"";
-  $contentDisposition = "attachment; filename=\"$fn\"";
+    $file = $ARGV[0];
+    $fn   = basename($ARGV[0]);
 
-  $cmd = "mail".
-         " -aContent-Type:'$contentType'".
-         " -aContent-Disposition:'$contentDisposition'".
-         " -aContent-Transfer-Encoding:'base64'".
-         " -s $sub".
-         " -aFrom:$from $to";
-  $cmd = encode('utf8', $cmd);
+    $fn64 = '=?UTF-8?B?'.
+            encode_base64(encode_utf8($fn), '').
+            '?='.
+            '';
+    $sub  = $fn64;
 
-  open($in, '<:raw', $file)  or die("$!:$file");
-  open($out, '|-:raw', $cmd) or die("$!");
-  $bs = 57*71; # 57bytes*71 < 4096
-  while (read($in, $buf, $bs)) {
-    $buf = encode_base64($buf);
-    print($out $buf);
+    $contentType  = _qx("file -bi '$file'").
+                    "; name=\"$fn64\"".
+                    '';
+    $contentDisposition = "attachment; filename=\"$fn64\"";
   }
-  close($out);
-  close($in);
+
+  {
+    my ($head, $mail, $in, $out, $buf, $bs);
+
+    $head = "MIME-Version: 1.0\n".
+            "Subject: $sub\n".
+            "From: <$from>\n".
+            "To: <$to>\n".
+            "Content-Type: $contentType\n".
+            "Content-Disposition: $contentDisposition\n".
+            "Content-Transfer-Encoding: base64\n".
+            '';
+
+    $mail = "sendmail -itf '$from'";
+
+    open($out, '<:raw', $file)
+      || die($!);
+    open($in, '|-:raw', LOCALE->encode($mail))
+      || die($!);
+
+    print($in encode('us-ascii', $head));
+
+    $bs = 60*57; # Optimized for Base64 Encoding (must be n*57 bytes)
+    while (read($out, $buf, $bs)) {
+      $buf = encode_base64($buf);
+      print($in $buf);
+    }
+
+    close($in);
+    close($out);
+  }
 
   return(0);
-  
+
 } exit(main());
 
 
 sub _qx($) {
 
-  state $locale = find_encoding('utf8');
-
   my ($cmd, $rtn);
-  $cmd = $locale->encode($_[0]);
+  $cmd = LOCALE->encode($_[0]);
   $rtn = qx($cmd);
   chomp($rtn);
   return($rtn);
-  
+
 }
