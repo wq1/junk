@@ -72,7 +72,7 @@ def main():
   tmp.seek(0);
   mime = MyPopen(
     'file -bi -',
-    stdin  = tmp,
+    stdin = tmp,
   );
   contType = mime.exe();
 
@@ -117,13 +117,8 @@ def main():
 
   mail = MyPopen(
     'sendmail -itf {}'.format(fr),
-    stdout=None,
-    stderr=None,
   );
-  mail.stdin.write(head);
-  mail.stdin.write(html64);
-  mail.stdin.close();
-  mail.wait();
+  mail.exe(input = head + html64);
 
   return 0;
 
