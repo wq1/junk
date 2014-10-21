@@ -28,7 +28,7 @@ class MyPopen(subprocess.Popen):
 
   def exe(self, input=None):
     stdout = self.communicate(input)[0];
-    return stdout;
+    return (stdout);
 
 
 class GetTag(html.parser.HTMLParser):
@@ -104,7 +104,7 @@ def main():
     contType += '; name=\"{}\"'.format(fn64);
     contDispos = 'attachment; filename=\"{}\"'.format(fn64);
   else:
-    sys.exit();
+    sys.exit(-1);
 
   head  = 'MIME-Version: 1.0\n';
   head += 'Subject: {}\n'.format(sub64);
@@ -120,14 +120,14 @@ def main():
   );
   mail.exe(input = head + html64);
 
-  return 0;
+  return (0);
 
 
 def autodec(str, errors='ignore'):
 # import chardet;
   str = str.decode(chardet.detect(str)['encoding'], errors);
-  return str;
+  return (str);
 
 
 if (__name__ == '__main__'):
-  main();
+  sys.exit(main());
