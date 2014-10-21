@@ -1,0 +1,4 @@
+# Replace '{}' with Filename.
+
+# Remove trailing whitespace characters from EOL
+perl -i -ple 's/\s+$//' {}
