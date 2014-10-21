@@ -11,51 +11,6 @@ import html.parser;
 import chardet;
 
 
-class MyPopen(subprocess.Popen):
-  def __init__(
-    self, args,
-    stdin  = subprocess.PIPE,
-    stdout = subprocess.PIPE,
-    stderr = subprocess.PIPE,
-  ):
-    args = shlex.split(args);
-    subprocess.Popen.__init__(
-      self, args,
-      stdin  = stdin,
-      stdout = stdout,
-      stderr = stderr,
-    );
-
-  def exe(self, input=None):
-    stdout = self.communicate(input)[0];
-    return (stdout);
-
-
-class GetTag(html.parser.HTMLParser):
-  def feed(self, data, tag):
-    self.tgt   = tag;
-    self.isTgt = 0;
-    self.rtn   = [];
-    html.parser.HTMLParser.feed(self, data);
-
-  def handle_starttag(self, tag, attrs):
-    if (tag == self.tgt):
-      self.isTgt = 1;
-
-  def handle_data(self, data):
-    if (self.isTgt):
-      self.isTgt = 0;
-      self.rtn.append(data);
-
-  def get(self, data, tag):
-    self.feed(data, tag);
-    return (self.rtn[-1]);
-
-  def getArray(self, data, tag):
-    self.feed(data, tag);
-    return (self.rtn);
-
-
 def main():
   to = 'foo@example.com';
   fr = 'bar@example.com';
@@ -121,6 +76,51 @@ def main():
   mail.exe(input = head + html64);
 
   return (0);
+
+
+class MyPopen(subprocess.Popen):
+  def __init__(
+    self, args,
+    stdin  = subprocess.PIPE,
+    stdout = subprocess.PIPE,
+    stderr = subprocess.PIPE,
+  ):
+    args = shlex.split(args);
+    subprocess.Popen.__init__(
+      self, args,
+      stdin  = stdin,
+      stdout = stdout,
+      stderr = stderr,
+    );
+
+  def exe(self, input=None):
+    stdout = self.communicate(input)[0];
+    return (stdout);
+
+
+class GetTag(html.parser.HTMLParser):
+  def feed(self, data, tag):
+    self.tgt   = tag;
+    self.isTgt = 0;
+    self.rtn   = [];
+    html.parser.HTMLParser.feed(self, data);
+
+  def handle_starttag(self, tag, attrs):
+    if (tag == self.tgt):
+      self.isTgt = 1;
+
+  def handle_data(self, data):
+    if (self.isTgt):
+      self.isTgt = 0;
+      self.rtn.append(data);
+
+  def get(self, data, tag):
+    self.feed(data, tag);
+    return (self.rtn[-1]);
+
+  def getArray(self, data, tag):
+    self.feed(data, tag);
+    return (self.rtn);
 
 
 def autodec(str, errors='ignore'):
