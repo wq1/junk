@@ -32,8 +32,8 @@ def main():
   contType = mime.exe();
 
   contType = contType.decode().rstrip();
-  match = re.match(r'text/html', contType);
 
+  match = re.match(r'text/html', contType);
   if (match):
     html00 = [];
     html64 = [];
@@ -49,7 +49,7 @@ def main():
     html64 = b'\n'.join(html64);
 
     html00 = autodec(html00).rstrip();
-  # html64 = html64.decode().rstrip();
+    # html64 = html64.decode().rstrip();
     title = GetTag();
     title = title.get(html00, 'title');
 
@@ -73,7 +73,7 @@ def main():
   mail = MyPopen(
     'sendmail -itf {}'.format(fr),
   );
-  mail.exe(input = head + html64);
+  mail.exe(head + html64);
 
   return (0);
 
@@ -124,7 +124,7 @@ class GetTag(html.parser.HTMLParser):
 
 
 def autodec(str, errors='ignore'):
-# import chardet;
+  # import chardet;
   str = str.decode(chardet.detect(str)['encoding'], errors);
   return (str);
 
