@@ -101,7 +101,7 @@ def main():
     sub64 = '=?UTF-8?B?{}?='.format(base64.b64encode(title.encode()).decode());
     fn00 = '{}.html'.format(title);
     fn64 = '=?UTF-8?B?{}?='.format(base64.b64encode(fn00.encode()).decode());
-    contType = '{}; name=\"{}\"'.format(contType, fn64);
+    contType += '; name=\"{}\"'.format(fn64);
     contDispos = 'attachment; filename=\"{}\"'.format(fn64);
   else:
     sys.exit();
