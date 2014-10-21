@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import sys;
-import shlex;
-import subprocess;
-import base64;
 import tempfile;
 import re;
-import html.parser;
-import chardet;
+import base64;
+# import shlex;
+# import subprocess;
+# import html.parser;
+# import chardet;
 
 
 def main():
@@ -78,6 +78,8 @@ def main():
   return (0);
 
 
+import shlex;
+import subprocess;
 class MyPopen(subprocess.Popen):
   def __init__(
     self, args,
@@ -98,6 +100,7 @@ class MyPopen(subprocess.Popen):
     return (stdout);
 
 
+import html.parser;
 class GetTag(html.parser.HTMLParser):
   def feed(self, data, tag):
     self.tgt   = tag;
@@ -123,8 +126,8 @@ class GetTag(html.parser.HTMLParser):
     return (self.rtn);
 
 
+import chardet;
 def autodec(str, errors='ignore'):
-  # import chardet;
   str = str.decode(chardet.detect(str)['encoding'], errors);
   return (str);
 
