@@ -106,13 +106,13 @@ def main():
   else:
     sys.exit();
 
-  head  = 'MIME-Version: 1.0\n'
-  head += 'Subject: {}\n'.format(sub64)
-  head += 'From: <{}>\n' .format(fr)
-  head += 'To: <{}>\n'   .format(to)
-  head += 'Content-Type: {}\n'       .format(contType)
-  head += 'Content-Disposition: {}\n'.format(contDispos)
-  head += 'Content-Transfer-Encoding: base64\n'
+  head  = 'MIME-Version: 1.0\n';
+  head += 'Subject: {}\n'.format(sub64);
+  head += 'From: <{}>\n' .format(fr);
+  head += 'To: <{}>\n'   .format(to);
+  head += 'Content-Type: {}\n'       .format(contType);
+  head += 'Content-Disposition: {}\n'.format(contDispos);
+  head += 'Content-Transfer-Encoding: base64\n';
   head  = head.encode();
 
   mail = MyPopen(
