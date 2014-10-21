@@ -93,7 +93,7 @@ def main():
     html00 = b''  .join(html00);
     html64 = b'\n'.join(html64);
 
-    html00 = html00.decode(chardet.detect(html00)['encoding'], 'ignore').rstrip();
+    html00 = autodec(html00).rstrip();
   # html64 = html64.decode().rstrip();
     title = GetTag();
     title = title.get(html00, 'title');
@@ -121,6 +121,12 @@ def main():
   mail.exe(input = head + html64);
 
   return 0;
+
+
+def autodec(str, errors='ignore'):
+# import chardet;
+  str = str.decode(chardet.detect(str)['encoding'], errors);
+  return str;
 
 
 if (__name__ == '__main__'):
