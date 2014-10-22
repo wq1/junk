@@ -155,7 +155,8 @@ def b64eol(s, length=76):
   rtn = [];
   for i in range(0, len(buf), length):
     rtn.append(buf[i:i+length]);
-  rtn = b'\n'.join(rtn.append(b''));
+  rtn.append(b'');
+  rtn = b'\n'.join(rtn);
   return (rtn);
 
 
