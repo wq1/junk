@@ -78,10 +78,10 @@ def main():
 
   src.seek(0);
   while True:
-    buf = src.read(57); # Optimized for Base64 Encoding
+    buf = src.read(60*57); # Optimized for Base64 Encoding
     if (not buf):
       break;
-    mail.stdin.write(base64.b64encode(buf) + b'\n');
+    mail.stdin.write(b64eol(buf));
 
   mail.stdin.close();
   mail.exe();
@@ -147,6 +147,16 @@ def autodec(str, errors='ignore'):
 def utf8b64(s):
   s = '=?UTF-8?B?{}?='.format(base64.b64encode(s.encode()).decode());
   return (s);
+
+
+# import base64;
+def b64eol(s, length=76):
+  buf = base64.b64encode(s);
+  rtn = [];
+  for i in range(0, len(buf), length):
+    rtn.append(buf[i:i+length]);
+  rtn = b'\n'.join(rtn.append(b''));
+  return (rtn);
 
 
 if (__name__ == '__main__'):
