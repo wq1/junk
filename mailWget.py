@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import sys;
-import tempfile;
 import re;
+import tempfile;
+import pathlib;
 import base64;
 # import shlex;
 # import subprocess;
@@ -15,65 +16,75 @@ def main():
   to = 'foo@example.com';
   fr = 'bar@example.com';
 
-  tmp = tempfile.TemporaryFile();
+  match = re.match(r'http://|https://', sys.argv[1], re.I);
+  if (match):
+    http = 1;
+    src = tempfile.TemporaryFile();
 
-  tmp.seek(0);
-  wget = MyPopen(
-    'wget -qO - {}'.format(sys.argv[1]),
-    stdout = tmp,
-  );
-  wget.exe();
+    src.seek(0);
+    wget = MyPopen(
+      'wget -qO - {}'.format(sys.argv[1]),
+      stdout = src,
+    );
+    wget.exe();
+  else:
+    http = 0;
+    src = open(sys.argv[1], 'rb');
 
-  tmp.seek(0);
+  src.seek(0);
   mime = MyPopen(
     'file -bi -',
-    stdin = tmp,
+    stdin = src,
   );
   contType = mime.exe();
-
   contType = contType.decode().rstrip();
 
   match = re.match(r'text/html', contType);
   if (match):
-    html00 = [];
-    html64 = [];
-
-    tmp.seek(0);
-    while True:
-      buf = tmp.read(57); # Optimized for Base64 Encoding
-      if (not buf):
-        break;
-      html00.append(buf);
-      html64.append(base64.b64encode(buf));
-    html00 = b''  .join(html00);
-    html64 = b'\n'.join(html64);
-
+    src.seek(0);
+    html00 = src.read();
     html00 = autodec(html00).rstrip();
-    # html64 = html64.decode().rstrip();
     title = GetTag();
     title = title.get(html00, 'title');
 
-    sub64 = '=?UTF-8?B?{}?='.format(base64.b64encode(title.encode()).decode());
-    fn00 = '{}.html'.format(title);
-    fn64 = '=?UTF-8?B?{}?='.format(base64.b64encode(fn00.encode()).decode());
-    contType += '; name=\"{}\"'.format(fn64);
-    contDispos = 'attachment; filename=\"{}\"'.format(fn64);
+    fn  = '{}.html'.format(title);
+    sub = title;
   else:
-    sys.exit(-1);
+    if (http):
+      fn = pathlib.PurePosixPath(sys.argv[1]).name;
+    else:
+      fn = pathlib.PurePath(sys.argv[1]).name;
+    sub = fn;
+
+  fn  = utf8b64(fn);
+  sub = utf8b64(sub);
+  contType += '; name=\"{}\"'.format(fn);
+  contDispos = 'attachment; filename=\"{}\"'.format(fn);
 
   head  = 'MIME-Version: 1.0\n';
-  head += 'Subject: {}\n'.format(sub64);
+  head += 'Subject: {}\n'.format(sub);
   head += 'From: <{}>\n' .format(fr);
   head += 'To: <{}>\n'   .format(to);
   head += 'Content-Type: {}\n'       .format(contType);
   head += 'Content-Disposition: {}\n'.format(contDispos);
   head += 'Content-Transfer-Encoding: base64\n';
-  head  = head.encode();
 
   mail = MyPopen(
     'sendmail -itf {}'.format(fr),
+    stdout = None,
+    stderr = None,
   );
-  mail.exe(head + html64);
+  mail.stdin.write(head.encode());
+
+  src.seek(0);
+  while True:
+    buf = src.read(57); # Optimized for Base64 Encoding
+    if (not buf):
+      break;
+    mail.stdin.write(base64.b64encode(buf) + b'\n');
+
+  mail.stdin.close();
+  mail.exe();
 
   return (0);
 
@@ -130,6 +141,12 @@ import chardet;
 def autodec(str, errors='ignore'):
   str = str.decode(chardet.detect(str)['encoding'], errors);
   return (str);
+
+
+# import base64;
+def utf8b64(s):
+  s = '=?UTF-8?B?{}?='.format(base64.b64encode(s.encode()).decode());
+  return (s);
 
 
 if (__name__ == '__main__'):
