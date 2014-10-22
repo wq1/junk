@@ -56,8 +56,8 @@ def main():
       fn = pathlib.PurePath(sys.argv[1]).name;
     sub = fn;
 
-  fn  = utf8b64(fn);
-  sub = utf8b64(sub);
+  fn  = b64utf8(fn);
+  sub = b64utf8(sub);
   contType += '; name=\"{}\"'.format(fn);
   contDispos = 'attachment; filename=\"{}\"'.format(fn);
 
@@ -144,7 +144,7 @@ def autodec(str, errors='ignore'):
 
 
 # import base64;
-def utf8b64(s):
+def b64utf8(s):
   s = '=?UTF-8?B?{}?='.format(base64.b64encode(s.encode()).decode());
   return (s);
 
