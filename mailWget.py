@@ -61,7 +61,7 @@ def main():
   contType += '; name=\"{}\"'.format(fn);
   contDispos = 'attachment; filename=\"{}\"'.format(fn);
 
-  head = (
+  head = [
     'MIME-Version: 1.0',
     'Subject: {}'            .format(sub),
     'From: <{}>'             .format(fr),
@@ -69,8 +69,9 @@ def main():
     'Content-Type: {}'       .format(contType),
     'Content-Disposition: {}'.format(contDispos),
     'Content-Transfer-Encoding: base64',
-  );
-  head = '\n'.join(head) + '\n';
+  ];
+  head.append('');
+  head = '\n'.join(head);
 
   mail = MyPopen(
     'sendmail -itf {}'.format(fr),
@@ -157,7 +158,8 @@ def b64eol(s, length=76):
   s = [];
   for i in range(0, len(buf), length):
     s.append(buf[i:i+length]);
-  s = b'\n'.join(s) + b'\n';
+  s.append(b'');
+  s = b'\n'.join(s);
   return s;
 
 
