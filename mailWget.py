@@ -18,7 +18,7 @@ def main():
 
   match = re.match(r'http://|https://', sys.argv[1], re.I);
   if match:
-    http = 1;
+    isHttp = 1;
     src = tempfile.TemporaryFile();
 
     src.seek(0);
@@ -28,7 +28,7 @@ def main():
     );
     wget.exe();
   else:
-    http = 0;
+    isHttp = 0;
     src = open(sys.argv[1], 'rb');
 
   src.seek(0);
@@ -50,7 +50,7 @@ def main():
     fn  = '{}.html'.format(title);
     sub = title;
   else:
-    if http:
+    if isHttp:
       fn = pathlib.PurePosixPath(sys.argv[1]).name;
     else:
       fn = pathlib.PurePath(sys.argv[1]).name;
