@@ -17,7 +17,7 @@ def main():
   fr = 'bar@example.com';
 
   match = re.match(r'http://|https://', sys.argv[1], re.I);
-  if (match):
+  if match:
     http = 1;
     src = tempfile.TemporaryFile();
 
@@ -40,7 +40,7 @@ def main():
   contType = contType.decode().rstrip();
 
   match = re.match(r'text/html', contType);
-  if (match):
+  if match:
     src.seek(0);
     html00 = src.read();
     html00 = autodec(html00);
@@ -50,7 +50,7 @@ def main():
     fn  = '{}.html'.format(title);
     sub = title;
   else:
-    if (http):
+    if http:
       fn = pathlib.PurePosixPath(sys.argv[1]).name;
     else:
       fn = pathlib.PurePath(sys.argv[1]).name;
@@ -78,15 +78,15 @@ def main():
 
   src.seek(0);
   while True:
-    buf = src.read(60*57); # Optimized for Base64 Encoding
-    if (not buf):
+    buf = src.read(60*57); # Optimized for Base64 Encoding (must be n*57 bytes)
+    if not buf:
       break;
     mail.stdin.write(b64eol(buf));
 
   mail.stdin.close();
   mail.exe();
 
-  return (0);
+  return 0;
 
 
 import shlex;
@@ -108,7 +108,7 @@ class MyPopen(subprocess.Popen):
 
   def exe(self, input=None):
     stdout = self.communicate(input)[0];
-    return (stdout);
+    return stdout;
 
 
 import html.parser;
@@ -120,34 +120,34 @@ class GetTag(html.parser.HTMLParser):
     html.parser.HTMLParser.feed(self, data);
 
   def handle_starttag(self, tag, attrs):
-    if (tag == self.tgt):
+    if tag == self.tgt:
       self.isTgt = 1;
 
   def handle_data(self, data):
-    if (self.isTgt):
+    if self.isTgt:
       self.isTgt = 0;
       self.rtn.append(data);
 
   def get(self, data, tag):
     self.feed(data, tag);
-    return (self.rtn[-1]);
+    return self.rtn[-1];
 
   def getArray(self, data, tag):
     self.feed(data, tag);
-    return (self.rtn);
+    return self.rtn;
 
 
 import chardet;
 def autodec(s, errors='ignore'):
   s = s.decode(chardet.detect(s)['encoding'], errors);
-  return (s);
+  return s;
 
 
 import base64;
 
 def b64utf8(s):
   s = '=?UTF-8?B?{}?='.format(base64.b64encode(s.encode()).decode());
-  return (s);
+  return s;
 
 def b64eol(s, length=76):
   buf = base64.b64encode(s);
@@ -156,8 +156,8 @@ def b64eol(s, length=76):
     s.append(buf[i:i+length]);
   s.append(b'');
   s = b'\n'.join(s);
-  return (s);
+  return s;
 
 
-if (__name__ == '__main__'):
+if __name__ == '__main__':
   sys.exit(main());
