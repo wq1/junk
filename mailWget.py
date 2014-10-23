@@ -5,7 +5,7 @@ import sys;
 import re;
 import tempfile;
 import pathlib;
-import base64;
+# import base64;
 # import shlex;
 # import subprocess;
 # import html.parser;
@@ -43,7 +43,7 @@ def main():
   if (match):
     src.seek(0);
     html00 = src.read();
-    html00 = autodec(html00).rstrip();
+    html00 = autodec(html00);
     title = GetTag();
     title = title.get(html00, 'title');
 
@@ -138,26 +138,25 @@ class GetTag(html.parser.HTMLParser):
 
 
 import chardet;
-def autodec(str, errors='ignore'):
-  str = str.decode(chardet.detect(str)['encoding'], errors);
-  return (str);
+def autodec(s, errors='ignore'):
+  s = s.decode(chardet.detect(s)['encoding'], errors);
+  return (s);
 
 
-# import base64;
+import base64;
+
 def b64utf8(s):
   s = '=?UTF-8?B?{}?='.format(base64.b64encode(s.encode()).decode());
   return (s);
 
-
-# import base64;
 def b64eol(s, length=76):
   buf = base64.b64encode(s);
-  rtn = [];
+  s = [];
   for i in range(0, len(buf), length):
-    rtn.append(buf[i:i+length]);
-  rtn.append(b'');
-  rtn = b'\n'.join(rtn);
-  return (rtn);
+    s.append(buf[i:i+length]);
+  s.append(b'');
+  s = b'\n'.join(s);
+  return (s);
 
 
 if (__name__ == '__main__'):
