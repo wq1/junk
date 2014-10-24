@@ -81,7 +81,7 @@ def main():
   mail.stdin.write(head.encode());
 
   src.seek(0);
-  while True:
+  while 1:
     buf = src.read(60*57); # Optimized for Base64 Encoding (must be n*57 bytes)
     if not buf:
       break;
